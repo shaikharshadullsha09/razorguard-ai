@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Activity, ArrowRight, BarChart3, Bell, BrainCircuit, CircleCheck, CreditCard, Eye, Gauge, IndianRupee, Landmark, Network, Radar, Search, ShieldCheck, SlidersHorizontal, Smartphone, TriangleAlert, WalletCards, Zap } from 'lucide-react'
+import { analyseSpike } from './services/riskApi'
 import './App.css'
 
 const stats = [
@@ -149,6 +150,38 @@ function EvaluationItem({ number, title, children }) {
   return <div><div className="evaluation-icon">{number}</div><div><strong>{title}</strong><span>{children}</span></div></div>
 }
 
+function RiskLab() {
+  const [mode, setMode] = useState('normal')
+  const [backendRisk, setBackendRisk] = useState(null)
+  const [error, setError] = useState('')
+
+  const windows = {
+    normal: { current_tx_per_min: 18, baseline_tx_per_min: 18, current_failure_rate: 1.2, baseline_failure_rate: 1.2, current_new_devices: 8, baseline_new_devices: 8, current_ip_repeats: 3, baseline_ip_repeats: 3 },
+    warning: { current_tx_per_min: 29, baseline_tx_per_min: 18, current_failure_rate: 3.2, baseline_failure_rate: 1.2, current_new_devices: 14, baseline_new_devices: 8, current_ip_repeats: 8, baseline_ip_repeats: 3 },
+    spike: { current_tx_per_min: 45, baseline_tx_per_min: 18, current_failure_rate: 8.7, baseline_failure_rate: 1.2, current_new_devices: 28, baseline_new_devices: 8, current_ip_repeats: 18, baseline_ip_repeats: 3 },
+  }
+
+  useEffect(() => {
+    let cancelled = false
+    setError('')
+    analyseSpike(windows[mode]).then((result) => {
+      if (!cancelled) setBackendRisk(result)
+    }).catch(() => {
+      if (!cancelled) {
+        setBackendRisk(null)
+        setError('Backend offline - showing the selected test window.')
+      }
+    })
+    return () => { cancelled = true }
+  }, [mode])
+
+  const current = windows[mode]
+  const score = backendRisk?.spike_score ?? (mode === 'spike' ? 90 : mode === 'warning' ? 42 : 8)
+  const status = backendRisk?.status ?? (mode === 'spike' ? 'critical' : mode === 'warning' ? 'warning' : 'normal')
+
+  return <section className="risk-lab-section" id="risk-lab"><div className="risk-lab-container"><div className="risk-lab-copy"><div className="section-label">BACKEND-CONNECTED PREVIEW</div><h2>Pressure-test the signal.<span>Watch the risk change.</span></h2><p>These controls send real baseline comparisons to the FastAPI spike detector. The response comes back as a score, status, ratios, and explainable signals.</p><div className="lab-mode-buttons">{[['normal', 'Normal traffic'], ['warning', 'Raise pressure'], ['spike', 'Simulate fraud spike']].map(([value, label]) => <button key={value} className={mode === value ? `active ${value}` : ''} onClick={() => setMode(value)}>{label}</button>)}</div>{error && <small className="lab-error">{error}</small>}</div><motion.div className="risk-lab-console" layout><div className="risk-lab-header"><div><span><span className="live-dot" /> FRAUD SPIKE LAB</span><h3>Current payment window</h3></div><strong className={`lab-status ${status}`}>{status.toUpperCase()}</strong></div><div className="risk-lab-score"><div><span>SPIKE SCORE</span><strong>{score}<small>/100</small></strong></div><div className={`lab-score-ring ${status}`} style={{ '--lab-score': `${score * 3.6}deg` }}><span>{score}</span></div></div><div className="risk-lab-stats"><div><span>TRANSACTIONS / MIN</span><strong>{current.current_tx_per_min}</strong><small>baseline {current.baseline_tx_per_min}</small></div><div><span>FAILURE RATE</span><strong>{current.current_failure_rate}%</strong><small>baseline {current.baseline_failure_rate}%</small></div><div><span>NEW DEVICES</span><strong>{current.current_new_devices}</strong><small>baseline {current.baseline_new_devices}</small></div></div><div className="lab-signal-list">{(backendRisk?.signals ?? [{ signal: 'waiting', message: 'Waiting for the FastAPI response.' }]).map((signal) => <div key={signal.signal}><TriangleAlert size={14} /><span>{signal.message}</span></div>)}</div><div className="lab-action"><span>RECOMMENDED ACTION</span><strong>{backendRisk?.recommended_action ?? 'Connect backend to receive action guidance'}</strong></div></motion.div></div></section>
+}
+
 function App() {
   return (
     <div className="app" id="top">
@@ -197,6 +230,7 @@ function App() {
 
       <HowItWorks />
       <IntelligenceBento />
+      <RiskLab />
       <TrustAndPerformance />
 
     </div>
