@@ -8,12 +8,16 @@ __pycache__/
 .venv/
 venv/
 .env
+.env.*
+!.env.example
 
 # Data and model outputs
 *.db
 *.sqlite
 *.sqlite3
 *.joblib
+!backend/artifacts/fraud_model.joblib
+!backend/artifacts/metrics.json
 ml/saved_models/*
 !ml/saved_models/.gitkeep
 

@@ -72,3 +72,31 @@ Payment routes:
 - `GET /payments/stream` returns the in-memory five-minute payment snapshot
 
 Local Checkout and signature verification work on `127.0.0.1`. Razorpay webhook delivery requires a public deployed URL, which is part of the final deployment phase. The payment stream is intentionally in-memory for this MVP and should move to SQLite/PostgreSQL later.
+
+## Phase 8: Deployment
+
+The repository is prepared for Vercel + Render deployment:
+
+- Vercel project root: `frontend/`
+- Frontend build command: `npm run build`
+- Frontend output directory: `dist`
+- Frontend variable: `VITE_API_URL=https://your-backend.onrender.com`
+- Render service root: `backend/`
+- Render build command: `pip install -r requirements.txt`
+- Render start command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+- Render variable: `FRONTEND_URL=https://your-site.vercel.app`
+
+`frontend/vercel.json` contains the Vite SPA rewrite. `render.yaml` contains the backend service definition and secret variable names. Use `frontend/.env.example` and `backend/.env.example` as templates; never commit real credentials.
+
+The deployable model artifact is `backend/artifacts/fraud_model.joblib`, generated from the synthetic development dataset. The metrics endpoint and UI label these results accordingly; they are not production fraud-performance claims.
+
+## Buildathon Demo
+
+1. Start with the payment-behaviour problem.
+2. Switch the Risk Lab from normal traffic to a simulated spike.
+3. Show the score, ratios, signals, and recommended action.
+4. Show the live model metrics and synthetic-data disclaimer.
+5. Run the Razorpay Test Mode payment after configuring credentials.
+6. Explain the server-side order, signature verification, and webhook stream.
+
+For deployment, configure the Razorpay Test Mode webhook URL as `https://your-backend.onrender.com/webhooks/razorpay` and enable `payment.captured` and `payment.failed`.

@@ -17,6 +17,8 @@ from .services.spike_service import analyze_spike
 load_dotenv()
 RAZORPAY_WEBHOOK_SECRET = os.getenv('RAZORPAY_WEBHOOK_SECRET')
 processed_webhook_events: set[str] = set()
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:5173')
+allowed_origins = ['http://localhost:5173', 'http://127.0.0.1:5173', FRONTEND_URL]
 
 app = FastAPI(
     title='RazorGuard AI API',
@@ -26,7 +28,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['http://localhost:5173', 'http://127.0.0.1:5173'],
+    allow_origins=list(dict.fromkeys(allowed_origins)),
     allow_credentials=True,
     allow_methods=['*'],
     allow_headers=['*'],
@@ -40,7 +42,8 @@ def root() -> dict[str, str]:
 
 @app.get('/health')
 def health_check() -> dict[str, str]:
-    return {'status': 'healthy', 'model': 'available after training'}
+    model_file = Path(__file__).resolve().parents[1] / 'artifacts' / 'fraud_model.joblib'
+    return {'status': 'healthy', 'model': 'loaded' if model_file.exists() else 'missing'}
 
 
 @app.post('/predict')

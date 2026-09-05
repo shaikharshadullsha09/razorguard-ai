@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Activity, ArrowRight, BarChart3, Bell, BrainCircuit, CircleCheck, CreditCard, Eye, Gauge, IndianRupee, Landmark, Network, Radar, Search, ShieldCheck, SlidersHorizontal, Smartphone, TriangleAlert, WalletCards, Zap } from 'lucide-react'
 import TestPaymentButton from './components/TestPaymentButton'
-import { analyseSpike } from './services/riskApi'
+import { analyseSpike, getModelMetrics } from './services/riskApi'
 import './App.css'
 
 const stats = [
@@ -109,6 +109,17 @@ function PaymentNode({ className, icon: Icon, title, subtitle, motionY }) {
   return <motion.div className={`payment-node ${className}`} animate={{ y: motionY }} transition={{ duration: 4.5, repeat: Infinity }}><Icon size={18} /><div><strong>{title}</strong><span>{subtitle}</span></div></motion.div>
 }
 
+function LiveMetrics() {
+  const [metrics, setMetrics] = useState(null)
+
+  useEffect(() => {
+    getModelMetrics().then(setMetrics).catch(() => setMetrics(null))
+  }, [])
+
+  const percent = (value) => metrics ? `${(metrics[value] * 100).toFixed(1)}%` : '-'
+  return <div className="live-metrics-panel"><div><span>LIVE MODEL EVALUATION</span><strong>{metrics ? 'Synthetic test set connected' : 'Waiting for backend metrics'}</strong></div><div className="live-metric-values"><div><small>PRECISION</small><b>{percent('precision')}</b></div><div><small>RECALL</small><b>{percent('recall')}</b></div><div><small>F1 SCORE</small><b>{percent('f1_score')}</b></div><div><small>FALSE POSITIVES</small><b>{metrics?.false_positive ?? '-'}</b></div></div><p>Evaluation on synthetic development data; not production fraud performance.</p></div>
+}
+
 function TrustAndPerformance() {
   return (
     <section className="trust-section" id="trust">
@@ -126,6 +137,7 @@ function TrustAndPerformance() {
           <TrustFeature icon={ShieldCheck} tone="green" title="Merchant control">RazorGuard recommends an action while keeping review decisions visible to the merchant.</TrustFeature>
           <TrustFeature icon={Gauge} tone="purple" title="Measured performance">Precision, recall, F1 score and false positives will come from the real held-out test set.</TrustFeature>
         </div>
+        <LiveMetrics />
 
         <motion.div className="performance-console" initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .2 }} transition={{ duration: .8 }}>
           <div className="performance-left"><div className="performance-title"><div><span>MODEL EVALUATION</span><h3>Fraud Detection Performance</h3></div><div className="backend-pending">BACKEND PENDING</div></div><div className="performance-metrics">{['PRECISION', 'RECALL', 'F1 SCORE'].map((metric) => <div key={metric}><span>{metric}</span><strong>-</strong><small>Awaiting model</small></div>)}</div><div className="confusion-wrapper"><div className="confusion-heading"><span>CONFUSION MATRIX</span><small>Held-out test data</small></div><div className="confusion-grid"><div /><div className="confusion-axis">Predicted Safe</div><div className="confusion-axis">Predicted Fraud</div><div className="confusion-axis">Actual Safe</div><MatrixCell tone="safe-cell" label="True Negative" /><MatrixCell tone="warning-cell" label="False Positive" /><div className="confusion-axis">Actual Fraud</div><MatrixCell tone="warning-cell" label="False Negative" /><MatrixCell tone="fraud-cell" label="True Positive" /></div></div></div>
