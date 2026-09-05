@@ -163,6 +163,11 @@ function EvaluationItem({ number, title, children }) {
   return <div><div className="evaluation-icon">{number}</div><div><strong>{title}</strong><span>{children}</span></div></div>
 }
 
+function InvestigationDrawer() {
+  const [open, setOpen] = useState(false)
+  return <section className="investigation-section"><div className="investigation-toolbar"><div><span className="section-label">MERCHANT ACTION CONSOLE</span><strong>Review the payments behind the spike.</strong></div><button className="investigate-trigger" onClick={() => setOpen((value) => !value)}>{open ? 'Close investigation' : 'Investigate event'} <ArrowRight size={14} /></button></div>{open && <motion.div className="investigation-drawer" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}><div className="investigation-drawer-head"><div><span>PRIORITY QUEUE</span><h3>3 payments need review</h3></div><strong>₹1,10,799 at risk</strong></div><div className="investigation-items"><div><span>pay_12AB</span><b>₹44,999</b><strong>94 / 100</strong><small>Velocity</small></div><div><span>pay_92JK</span><b>₹38,000</b><strong>91 / 100</strong><small>Device</small></div><div><span>pay_77TR</span><b>₹27,800</b><strong>88 / 100</strong><small>IP cluster</small></div></div></motion.div>}</section>
+}
+
 function RiskLab() {
   const [mode, setMode] = useState('normal')
   const [backendRisk, setBackendRisk] = useState(null)
@@ -244,6 +249,7 @@ function App() {
       <HowItWorks />
       <IntelligenceBento />
       <RiskLab />
+      <InvestigationDrawer />
       <div className="payment-launcher"><TestPaymentButton /></div>
       <TrustAndPerformance />
 
