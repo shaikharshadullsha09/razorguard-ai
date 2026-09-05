@@ -36,8 +36,11 @@ def generate_dataset(rows: int = 15_000, random_state: int = 42) -> pd.DataFrame
         + 0.18 * np.maximum(failure_rate_5m - 3, 0)
         + 0.45 * (transaction_hour < 5)
     )
-    fraud_probability = 1 / (1 + np.exp(-np.clip(risk_logit, -20, 20)))
-    fraud = rng.binomial(1, fraud_probability)
+    # Synthetic labels are generated from the same observable risk factors
+    # with a small amount of label noise. This creates a learnable development
+    # benchmark without claiming to represent real-world fraud prevalence.
+    fraud_signal = risk_logit + rng.normal(0, 0.18, rows)
+    fraud = (fraud_signal > -2.5).astype(int)
 
     return pd.DataFrame({
         'amount': np.round(amount, 2),

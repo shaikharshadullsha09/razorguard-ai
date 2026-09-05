@@ -47,10 +47,11 @@ def predict_transaction(transaction: TransactionInput) -> dict[str, Any]:
     bundle = _load_bundle()
     frame = pd.DataFrame([transaction.model_dump()])[bundle['features']]
     probability = float(bundle['model'].predict_proba(frame)[0][1])
+    threshold = float(bundle.get('threshold', 0.5))
     risk_score = round(probability * 100)
-    if risk_score >= 70:
+    if probability >= threshold:
         level, action = 'high', 'Hold and verify payment'
-    elif risk_score >= 35:
+    elif probability >= threshold * 0.55:
         level, action = 'review', 'Manual review recommended'
     else:
         level, action = 'low', 'Approve and continue monitoring'

@@ -15,9 +15,7 @@ RazorGuard AI observes transaction streams, detects abnormal changes in payment 
 
 ## Current Phase
 
-Step 1: project setup.
-
-The next implementation step is to create a transaction dataset, explore it with Pandas, and build the first fraud engine before designing the frontend.
+Final integration and QA. Model V2, the FastAPI service, Razorpay Test Mode pipeline, frontend integration, and deployment configuration are implemented.
 
 ## Backend Quick Start
 
@@ -52,7 +50,14 @@ Available endpoints:
 - `POST /spike/analyze`
 - `GET /metrics`
 
-The generated dataset and metrics describe a synthetic development environment. They are not evidence of real-world fraud performance. The trained `.joblib` model artifact is intentionally ignored by Git and should be regenerated from the training scripts.
+The generated dataset and metrics describe a synthetic development environment. They are not evidence of real-world fraud performance. Model V2 selects its decision threshold on a validation split and evaluates once on an untouched test split. The trained artifact is included for deployment and can be regenerated from the training scripts.
+
+Current Model V2 test metrics:
+
+- Precision: `78.40%`
+- Recall: `86.67%`
+- F1 score: `82.33%`
+- Decision threshold: `0.58`
 
 ## Phase 7: Razorpay Test Mode
 
