@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+.env
+
+# Data and model outputs
+*.db
+*.sqlite
+*.sqlite3
+ml/saved_models/*
+!ml/saved_models/.gitkeep
+
+# Frontend
+node_modules/
+dist/
+.vite/
+
+# Editors and OS
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+.DS_Store
+Thumbs.db
