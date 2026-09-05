@@ -53,3 +53,22 @@ Available endpoints:
 - `GET /metrics`
 
 The generated dataset and metrics describe a synthetic development environment. They are not evidence of real-world fraud performance. The trained `.joblib` model artifact is intentionally ignored by Git and should be regenerated from the training scripts.
+
+## Phase 7: Razorpay Test Mode
+
+Copy `backend/.env.example` to `backend/.env` and fill it with Razorpay **Test Mode** credentials. Never expose the key secret or webhook secret in React or commit the `.env` file.
+
+```powershell
+cd backend
+.\.venv\Scripts\Activate.ps1
+uvicorn app.main:app --reload
+```
+
+Payment routes:
+
+- `POST /payments/create-order` creates a server-side test order in paise
+- `POST /payments/verify` verifies the Checkout signature server-side
+- `POST /webhooks/razorpay` verifies the raw webhook body and records captured/failed payments
+- `GET /payments/stream` returns the in-memory five-minute payment snapshot
+
+Local Checkout and signature verification work on `127.0.0.1`. Razorpay webhook delivery requires a public deployed URL, which is part of the final deployment phase. The payment stream is intentionally in-memory for this MVP and should move to SQLite/PostgreSQL later.

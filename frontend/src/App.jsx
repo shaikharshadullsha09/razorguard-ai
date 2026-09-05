@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Activity, ArrowRight, BarChart3, Bell, BrainCircuit, CircleCheck, CreditCard, Eye, Gauge, IndianRupee, Landmark, Network, Radar, Search, ShieldCheck, SlidersHorizontal, Smartphone, TriangleAlert, WalletCards, Zap } from 'lucide-react'
+import TestPaymentButton from './components/TestPaymentButton'
 import { analyseSpike } from './services/riskApi'
 import './App.css'
 
@@ -231,6 +232,7 @@ function App() {
       <HowItWorks />
       <IntelligenceBento />
       <RiskLab />
+      <div className="payment-launcher"><TestPaymentButton /></div>
       <TrustAndPerformance />
 
     </div>

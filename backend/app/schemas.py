@@ -24,3 +24,15 @@ class SpikeInput(BaseModel):
     baseline_new_devices: int = Field(ge=0)
     current_ip_repeats: int = Field(ge=0)
     baseline_ip_repeats: int = Field(ge=0)
+
+
+class CreateOrderInput(BaseModel):
+    amount: float = Field(gt=0)
+    currency: str = 'INR'
+    receipt: str | None = None
+
+
+class VerifyPaymentInput(BaseModel):
+    razorpay_order_id: str
+    razorpay_payment_id: str
+    razorpay_signature: str
